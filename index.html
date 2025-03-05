@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Определение музыкальных интервалов</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+    #app {
+      max-width: 600px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    h2 {
+      text-align: center;
+    }
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #answers {
+      margin-top: 20px;
+      text-align: center;
+    }
+    #message {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <h2>Определение музыкальных интервалов</h2>
+    <button id="playInterval">Сыграть интервал</button>
+    <div id="answers"></div>
+    <div id="message"></div>
+  </div>
+
+  <script>
+    // Массив с интервалами: название и число полутонов
+    const intervals = [
+      {name: "Малая секунда (1 полутон)", semitones: 1},
+      {name: "Большая секунда (2 полутона)", semitones: 2},
+      {name: "Малая терция (3 полутона)", semitones: 3},
+      {name: "Большая терция (4 полутона)", semitones: 4},
+      {name: "Чистая кварта (5 полутонов)", semitones: 5},
+      {name: "Тритон (6 полутонов)", semitones: 6},
+      {name: "Чистая квинта (7 полутонов)", semitones: 7},
+      {name: "Малая секста (8 полутонов)", semitones: 8},
+      {name: "Большая секста (9 полутонов)", semitones: 9},
+      {name: "Малая септима (10 полутонов)", semitones: 10},
+      {name: "Большая септима (11 полутонов)", semitones: 11},
+      {name: "Октава (12 полутонов)", semitones: 12}
+    ];
+
+    let correctInterval = null;
+
+    // Функция для проигрывания интервала с использованием Web Audio API
+    function playIntervalSound(baseFreq, intervalSemitones) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContext();
+
+      const toneDuration = 0.5; // продолжительность каждого тона (сек.)
+      const gap = 0.3;         // промежуток между тонами
+
+      const now = audioCtx.currentTime;
+
+      // Проигрывание первого тона
+      const oscillator1 = audioCtx.createOscillator();
+      oscillator1.type = 'sine';
+      oscillator1.frequency.setValueAtTime(baseFreq, now);
+      oscillator1.connect(audioCtx.destination);
+      oscillator1.start(now);
+      oscillator1.stop(now + toneDuration);
+
+      // Расчёт частоты для второго тона
+      const secondFreq = baseFreq * Math.pow(2, intervalSemitones/12);
+
+      // Проигрывание второго тона
+      const oscillator2 = audioCtx.createOscillator();
+      oscillator2.type = 'sine';
+      oscillator2.frequency.setValueAtTime(secondFreq, now + toneDuration + gap);
+      oscillator2.connect(audioCtx.destination);
+      oscillator2.start(now + toneDuration + gap);
+      oscillator2.stop(now + toneDuration*2 + gap);
+    }
+
+    // Функция начала нового раунда: выбор случайного интервала и воспроизведение звука
+    function startRound() {
+      document.getElementById('message').textContent = '';
+      
+      // Выбираем случайный интервал из массива
+      const randomIndex = Math.floor(Math.random() * intervals.length);
+      correctInterval = intervals[randomIndex];
+
+      // Выбираем случайную базовую частоту в диапазоне от 220 до 440 Гц
+      const baseFreq = Math.random() * (440 - 220) + 220;
+
+      // Проигрываем интервал
+      playIntervalSound(baseFreq, correctInterval.semitones);
+    }
+
+    // Функция отрисовки кнопок с вариантами ответа
+    function renderAnswerButtons() {
+      const answersDiv = document.getElementById('answers');
+      answersDiv.innerHTML = '';
+      intervals.forEach(interval => {
+        const button = document.createElement('button');
+        button.textContent = interval.name;
+        button.addEventListener('click', () => {
+          if (correctInterval && interval.semitones === correctInterval.semitones) {
+            document.getElementById('message').textContent = 'Правильно!';
+          } else {
+            document.getElementById('message').textContent = 'Неправильно. Правильный ответ: ' + correctInterval.name;
+          }
+        });
+        answersDiv.appendChild(button);
+      });
+    }
+
+    // Привязка событий
+    document.getElementById('playInterval').addEventListener('click', startRound);
+    renderAnswerButtons();
+
+    // Интеграция с Telegram Web App (если запускается внутри Telegram)
+    if (window.Telegram && window.Telegram.WebApp) {
+      Telegram.WebApp.ready();
+    }
+  </script>
+</body>
+</html>

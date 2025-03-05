@@ -72,29 +72,35 @@
       const AudioContext = window.AudioContext || window.webkitAudioContext;
       const audioCtx = new AudioContext();
 
-      const toneDuration = 0.5; // продолжительность каждого тона (сек.)
-      const gap = 0.3;         // промежуток между тонами
-
       const now = audioCtx.currentTime;
 
-      // Проигрывание первого тона
+      // Проигрывание первого тона (симуляция пианино с осциллятором)
       const oscillator1 = audioCtx.createOscillator();
-      oscillator1.type = 'sine';
+      oscillator1.type = 'sine'; // Используем синусоидальную волну, для пианино можно использовать более сложные волны
       oscillator1.frequency.setValueAtTime(baseFreq, now);
-      oscillator1.connect(audioCtx.destination);
+
+      const gain1 = audioCtx.createGain();
+      gain1.gain.setValueAtTime(0.5, now); // Уровень громкости
+      oscillator1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+
       oscillator1.start(now);
-      oscillator1.stop(now + toneDuration);
+      oscillator1.stop(now + 0.5);
 
-      // Расчёт частоты для второго тона
-      const secondFreq = baseFreq * Math.pow(2, intervalSemitones/12);
+      // Проигрывание второго тона с выбранным интервалом
+      const secondFreq = baseFreq * Math.pow(2, intervalSemitones / 12);
 
-      // Проигрывание второго тона
       const oscillator2 = audioCtx.createOscillator();
-      oscillator2.type = 'sine';
-      oscillator2.frequency.setValueAtTime(secondFreq, now + toneDuration + gap);
-      oscillator2.connect(audioCtx.destination);
-      oscillator2.start(now + toneDuration + gap);
-      oscillator2.stop(now + toneDuration*2 + gap);
+      oscillator2.type = 'sine'; // Тембр пианино может быть улучшен, здесь используется синусоида для простоты
+      oscillator2.frequency.setValueAtTime(secondFreq, now);
+
+      const gain2 = audioCtx.createGain();
+      gain2.gain.setValueAtTime(0.5, now); // Уровень громкости
+      oscillator2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+
+      oscillator2.start(now);
+      oscillator2.stop(now + 0.5);
     }
 
     // Функция начала нового раунда: выбор случайного интервала и воспроизведение звука

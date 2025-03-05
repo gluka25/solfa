@@ -70,28 +70,30 @@
 
     let correctInterval = null;
 
-    // Создание синтезатора Tone.js (используем тембр пианино)
-    const synth = new Tone.Synth({
-      oscillator: {
-        type: 'square',  // Используем прямоугольную волну для тембра
+    // Создаем сэмплер для пианино с использованием сэмплов
+    const sampler = new Tone.Sampler({
+      urls: {
+        "C4": "https://tonejs.github.io/audio/casio/C4.mp3",
+        "D4": "https://tonejs.github.io/audio/casio/D4.mp3",
+        "E4": "https://tonejs.github.io/audio/casio/E4.mp3",
+        "F4": "https://tonejs.github.io/audio/casio/F4.mp3",
+        "G4": "https://tonejs.github.io/audio/casio/G4.mp3",
+        "A4": "https://tonejs.github.io/audio/casio/A4.mp3",
+        "B4": "https://tonejs.github.io/audio/casio/B4.mp3",
+        "C5": "https://tonejs.github.io/audio/casio/C5.mp3"
       },
-      envelope: {
-        attack: 0.1,
-        decay: 0.2,
-        sustain: 0.5,
-        release: 0.8,
-      }
+      release: 1,
     }).toDestination();
 
-    // Функция для проигрывания интервала с использованием Tone.js
-    function playIntervalSound(baseFreq, intervalSemitones) {
-      // Переводим частоты в ноты (первый и второй тон)
-      const baseNote = Tone.Frequency(baseFreq, "midi");
-      const intervalNote = Tone.Frequency(baseFreq * Math.pow(2, intervalSemitones / 12), "midi");
+    // Функция для проигрывания интервала с использованием Tone.Sampler (сэмплы пианино)
+    function playIntervalSound(baseNote, intervalSemitones) {
+      // Получаем ноты для базовой и интервалированной частоты
+      const baseNoteString = Tone.Frequency(baseNote, "midi").toNote();
+      const intervalNote = Tone.Frequency(baseNote * Math.pow(2, intervalSemitones / 12), "midi").toNote();
 
-      // Проигрывание обоих нот одновременно
-      synth.triggerAttackRelease(baseNote, "8n");
-      synth.triggerAttackRelease(intervalNote, "8n");
+      // Проигрывание обоих сэмплов одновременно
+      sampler.triggerAttackRelease(baseNoteString, "8n");
+      sampler.triggerAttackRelease(intervalNote, "8n");
     }
 
     // Функция начала нового раунда: выбор случайного интервала и воспроизведение звука
@@ -103,10 +105,10 @@
       correctInterval = intervals[randomIndex];
 
       // Выбираем случайную базовую частоту (в диапазоне от 60 до 72 MIDI-ноты, что соответствует нотам от до3 до до4)
-      const baseFreq = Math.floor(Math.random() * (72 - 60 + 1)) + 60; // случайное значение MIDI-ноты
+      const baseNote = Math.floor(Math.random() * (72 - 60 + 1)) + 60; // случайное значение MIDI-ноты
 
       // Проигрываем интервал
-      playIntervalSound(baseFreq, correctInterval.semitones);
+      playIntervalSound(baseNote, correctInterval.semitones);
     }
 
     // Функция отрисовки кнопок с вариантами ответа

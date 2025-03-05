@@ -48,6 +48,9 @@
     <div id="message"></div>
   </div>
 
+  <!-- Подключаем библиотеку Tone.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.28/build/Tone.js"></script>
+
   <script>
     // Массив с интервалами: название и число полутонов
     const intervals = [
@@ -67,40 +70,28 @@
 
     let correctInterval = null;
 
-    // Функция для проигрывания интервала с использованием Web Audio API
+    // Создание синтезатора Tone.js (используем тембр пианино)
+    const synth = new Tone.Synth({
+      oscillator: {
+        type: 'square',  // Используем прямоугольную волну для тембра
+      },
+      envelope: {
+        attack: 0.1,
+        decay: 0.2,
+        sustain: 0.5,
+        release: 0.8,
+      }
+    }).toDestination();
+
+    // Функция для проигрывания интервала с использованием Tone.js
     function playIntervalSound(baseFreq, intervalSemitones) {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      const audioCtx = new AudioContext();
+      // Переводим частоты в ноты (первый и второй тон)
+      const baseNote = Tone.Frequency(baseFreq, "midi");
+      const intervalNote = Tone.Frequency(baseFreq * Math.pow(2, intervalSemitones / 12), "midi");
 
-      const now = audioCtx.currentTime;
-
-      // Проигрывание первого тона (симуляция пианино с осциллятором)
-      const oscillator1 = audioCtx.createOscillator();
-      oscillator1.type = 'sine'; // Используем синусоидальную волну, для пианино можно использовать более сложные волны
-      oscillator1.frequency.setValueAtTime(baseFreq, now);
-
-      const gain1 = audioCtx.createGain();
-      gain1.gain.setValueAtTime(0.5, now); // Уровень громкости
-      oscillator1.connect(gain1);
-      gain1.connect(audioCtx.destination);
-
-      oscillator1.start(now);
-      oscillator1.stop(now + 0.5);
-
-      // Проигрывание второго тона с выбранным интервалом
-      const secondFreq = baseFreq * Math.pow(2, intervalSemitones / 12);
-
-      const oscillator2 = audioCtx.createOscillator();
-      oscillator2.type = 'sine'; // Тембр пианино может быть улучшен, здесь используется синусоида для простоты
-      oscillator2.frequency.setValueAtTime(secondFreq, now);
-
-      const gain2 = audioCtx.createGain();
-      gain2.gain.setValueAtTime(0.5, now); // Уровень громкости
-      oscillator2.connect(gain2);
-      gain2.connect(audioCtx.destination);
-
-      oscillator2.start(now);
-      oscillator2.stop(now + 0.5);
+      // Проигрывание обоих нот одновременно
+      synth.triggerAttackRelease(baseNote, "8n");
+      synth.triggerAttackRelease(intervalNote, "8n");
     }
 
     // Функция начала нового раунда: выбор случайного интервала и воспроизведение звука
@@ -111,8 +102,8 @@
       const randomIndex = Math.floor(Math.random() * intervals.length);
       correctInterval = intervals[randomIndex];
 
-      // Выбираем случайную базовую частоту в диапазоне от 220 до 440 Гц
-      const baseFreq = Math.random() * (440 - 220) + 220;
+      // Выбираем случайную базовую частоту (в диапазоне от 60 до 72 MIDI-ноты, что соответствует нотам от до3 до до4)
+      const baseFreq = Math.floor(Math.random() * (72 - 60 + 1)) + 60; // случайное значение MIDI-ноты
 
       // Проигрываем интервал
       playIntervalSound(baseFreq, correctInterval.semitones);

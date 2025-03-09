@@ -48,67 +48,36 @@
     <div id="message"></div>
   </div>
 
-  <!-- Подключаем библиотеку Tone.js -->
-  <script src="https://cdn.jsdelivr.net/npm/tone@14.8.28/build/Tone.js"></script>
-
   <script>
-    // Массив с интервалами: название и число полутонов
+    // Массив с интервалами и MP3 файлами
     const intervals = [
-      {name: "Малая секунда (1 полутон)", semitones: 1},
-      {name: "Большая секунда (2 полутона)", semitones: 2},
-      {name: "Малая терция (3 полутона)", semitones: 3},
-      {name: "Большая терция (4 полутона)", semitones: 4},
-      {name: "Чистая кварта (5 полутонов)", semitones: 5},
-      {name: "Тритон (6 полутонов)", semitones: 6},
-      {name: "Чистая квинта (7 полутонов)", semitones: 7},
-      {name: "Малая секста (8 полутонов)", semitones: 8},
-      {name: "Большая секста (9 полутонов)", semitones: 9},
-      {name: "Малая септима (10 полутонов)", semitones: 10},
-      {name: "Большая септима (11 полутонов)", semitones: 11},
-      {name: "Октава (12 полутонов)", semitones: 12}
+      { name: "Малая секунда", file: "https://gluka25.github.io/solfa/m2.mp3" },
+      { name: "Большая секунда", file: "https://gluka25.github.io/solfa/b2.mp3" },
+      { name: "Малая терция", file: "https://gluka25.github.io/solfa/m3.mp3" },
+      { name: "Большая терция", file: "https://gluka25.github.io/solfa/b3.mp3" },
+      { name: "Чистая кварта", file: "https://gluka25.github.io/solfa/c4.mp3" },
+      { name: "Чистая квинта", file: "https://gluka25.github.io/solfa/c5.mp3" },
+      { name: "Малая секста", file: "https://gluka25.github.io/solfa/m6.mp3" },
+      { name: "Большая секста", file: "https://gluka25.github.io/solfa/b6.mp3" },
+      { name: "Малая септима", file: "https://gluka25.github.io/solfa/m7.mp3" },
+      { name: "Большая септима", file: "https://gluka25.github.io/solfa/b7.mp3" },
+      { name: "Октава", file: "https://gluka25.github.io/solfa/c8.mp3" }
     ];
 
     let correctInterval = null;
 
-    // Создаем сэмплер для пианино с использованием сэмплов
-    const sampler = new Tone.Sampler({
-      urls: {
-        "C4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "D4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "E4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "F4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "G4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "A4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "B4": "https://gluka25.github.io/solfa/minor-second.mp3",
-        "C5": "https://gluka25.github.io/solfa/minor-second.mp3"
-      },
-      release: 1,
-    }).toDestination();
-
-    // Функция для проигрывания интервала с использованием Tone.Sampler (сэмплы пианино)
-    function playIntervalSound(baseNote, intervalSemitones) {
-      // Получаем ноты для базовой и интервалированной частоты
-      const baseNoteString = Tone.Frequency(baseNote, "midi").toNote();
-      const intervalNote = Tone.Frequency(baseNote * Math.pow(2, intervalSemitones / 12), "midi").toNote();
-
-      // Проигрывание обоих сэмплов одновременно
-      sampler.triggerAttackRelease(baseNoteString, "8n");
-      sampler.triggerAttackRelease(intervalNote, "8n");
-    }
-
-    // Функция начала нового раунда: выбор случайного интервала и воспроизведение звука
-    function startRound() {
-      document.getElementById('message').textContent = '';
-      
+    // Функция для проигрывания случайного интервала
+    function playRandomInterval() {
       // Выбираем случайный интервал из массива
       const randomIndex = Math.floor(Math.random() * intervals.length);
       correctInterval = intervals[randomIndex];
 
-      // Выбираем случайную базовую частоту (в диапазоне от 60 до 72 MIDI-ноты, что соответствует нотам от до3 до до4)
-      const baseNote = Math.floor(Math.random() * (72 - 60 + 1)) + 60; // случайное значение MIDI-ноты
+      // Проигрываем MP3 файл для выбранного интервала
+      const audio = new Audio(correctInterval.file);
+      audio.play();
 
-      // Проигрываем интервал
-      playIntervalSound(baseNote, correctInterval.semitones);
+      // Отображаем варианты ответа
+      renderAnswerButtons();
     }
 
     // Функция отрисовки кнопок с вариантами ответа
@@ -119,7 +88,7 @@
         const button = document.createElement('button');
         button.textContent = interval.name;
         button.addEventListener('click', () => {
-          if (correctInterval && interval.semitones === correctInterval.semitones) {
+          if (correctInterval && interval.name === correctInterval.name) {
             document.getElementById('message').textContent = 'Правильно!';
           } else {
             document.getElementById('message').textContent = 'Неправильно. Правильный ответ: ' + correctInterval.name;
@@ -130,13 +99,8 @@
     }
 
     // Привязка событий
-    document.getElementById('playInterval').addEventListener('click', startRound);
-    renderAnswerButtons();
-
-    // Интеграция с Telegram Web App (если запускается внутри Telegram)
-    if (window.Telegram && window.Telegram.WebApp) {
-      Telegram.WebApp.ready();
-    }
+    document.getElementById('playInterval').addEventListener('click', playRandomInterval);
+    
   </script>
 </body>
 </html>

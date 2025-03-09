@@ -64,26 +64,36 @@
       { name: "Октава", file: "https://gluka25.github.io/solfa/c8.mp3" }
     ];
 
-    let correctInterval = null;
+    let correctInterval = null;  // Текущий интервал
+    let intervalPlayed = false;  // Флаг, который отслеживает, был ли интервал уже проигран
 
     // Функция для проигрывания случайного интервала
-    function playRandomInterval() {
-      // Выбираем случайный интервал из массива
-      const randomIndex = Math.floor(Math.random() * intervals.length);
-      correctInterval = intervals[randomIndex];
-
-      // Проигрываем MP3 файл для выбранного интервала
-      const audio = new Audio(correctInterval.file);
-      audio.play();
-
-      // Отображаем варианты ответа
-      renderAnswerButtons();
+    function playInterval() {
+      if (intervalPlayed) {
+        // Если интервал уже был сыгран, просто проигрываем тот же интервал
+        const audio = new Audio(correctInterval.file);
+        audio.play();
+      } else {
+        // Выбираем случайный интервал из массива
+        const randomIndex = Math.floor(Math.random() * intervals.length);
+        correctInterval = intervals[randomIndex];
+        
+        // Проигрываем MP3 файл для выбранного интервала
+        const audio = new Audio(correctInterval.file);
+        audio.play();
+        
+        // Устанавливаем флаг, что интервал был проигран
+        intervalPlayed = true;
+        
+        // Отображаем варианты ответа
+        renderAnswerButtons();
+      }
     }
 
     // Функция отрисовки кнопок с вариантами ответа
     function renderAnswerButtons() {
       const answersDiv = document.getElementById('answers');
-      answersDiv.innerHTML = '';
+      answersDiv.innerHTML = '';  // Очищаем старые кнопки
       intervals.forEach(interval => {
         const button = document.createElement('button');
         button.textContent = interval.name;
@@ -93,14 +103,16 @@
           } else {
             document.getElementById('message').textContent = 'Неправильно. Правильный ответ: ' + correctInterval.name;
           }
+          
+          // После выбора ответа сбрасываем флаг и очищаем кнопку
+          intervalPlayed = false;
         });
         answersDiv.appendChild(button);
       });
     }
 
     // Привязка событий
-    document.getElementById('playInterval').addEventListener('click', playRandomInterval);
-    
+    document.getElementById('playInterval').addEventListener('click', playInterval);
   </script>
 </body>
 </html>

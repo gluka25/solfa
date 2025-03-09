@@ -114,6 +114,9 @@
 
     // Функция для проигрывания случайного интервала
     function playInterval() {
+      // Очищаем сообщение о правильности/неправильности
+      document.getElementById('message').textContent = '';
+
       if (intervalPlayed) {
         // Если интервал уже был сыгран, просто проигрываем тот же интервал
         const audio = new Audio(correctInterval.file);

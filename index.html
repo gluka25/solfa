@@ -24,19 +24,49 @@
     }
     button {
       margin: 5px;
-      padding: 10px 15px;
-      font-size: 16px;
+      padding: 8px 12px;
+      font-size: 14px;
       cursor: pointer;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      background-color: #007bff;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0056b3;
     }
     #answers {
       margin-top: 20px;
       text-align: center;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    #answers button {
+      margin: 5px;
     }
     #message {
       margin-top: 20px;
       text-align: center;
       font-size: 18px;
       font-weight: bold;
+    }
+
+    /* Медиазапрос для мобильных устройств */
+    @media (max-width: 600px) {
+      button {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      #answers {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Два столбца на мобильных */
+        gap: 10px;
+      }
+      #message {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
